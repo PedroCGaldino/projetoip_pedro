@@ -27,6 +27,7 @@ class Caramelo(pygame.sprite.Sprite):
         self.sprites.append(pygame.image.load('sprites/sprite_latido2.png'))
         self.sprites.append(pygame.image.load('sprites/sprite_latido3.png'))
         self.sprites.append(pygame.image.load('sprites/sprite_latido4.png'))
+        
         self.andando_sprites = []
         spritesheet_andando = pygame.image.load('sprites/caramelo_andando.png')
         frame_width = spritesheet_andando.get_width() // 3
@@ -34,6 +35,7 @@ class Caramelo(pygame.sprite.Sprite):
         for i in range(3):
             rect = pygame.Rect(i * frame_width, 0, frame_width, frame_height)
             self.andando_sprites.append(spritesheet_andando.subsurface(rect))
+            
         self.pulando_sprites = []
         spritesheet_pulando = pygame.image.load('sprites/caramelo_pulando.png')
         frame_width_p = spritesheet_pulando.get_width() // 8
@@ -42,18 +44,19 @@ class Caramelo(pygame.sprite.Sprite):
             rect = pygame.Rect(i * frame_width_p, 0, frame_width_p, frame_height_p)
             self.pulando_sprites.append(spritesheet_pulando.subsurface(rect))
         self.atual = 0
+        
         self.image = self.sprites[self.atual]
         self.image = pygame.transform.scale(self.image, (120, 120))
         
         self.rect = self.image.get_rect()
         self.rect.topleft = (100, 785)
 
-        self.animar_latir = False
-        self.andando = False
-        self.pulando = False
-        self.direcao = 0
+        self.animar_latir = False # Controla a animação de latido
+        self.andando = False # Controla a animação de andar
+        self.pulando = False # Controla a animação de pulo
+        self.direcao = 0 # Direção do movimento
         self.velocidade = 5
-        self.facing = 1
+        self.facing = 1 # 1 para direita, -1 para esquerda
         self.velocity_y = 0
         self.gravity = 0.3
         self.jump_strength = 10
@@ -62,36 +65,42 @@ class Caramelo(pygame.sprite.Sprite):
 
     def latir(self):
         self.animar_latir = True
+        
     def andar(self, direcao):
         self.andando = True
         self.direcao = direcao
         self.facing = direcao
+        
     def pular(self):
         if self.on_ground:
             self.velocity_y = -self.jump_strength
             self.on_ground = False
             self.pulando = True
             self.atual = 0
+            
     def parar(self):
         self.andando = False
+        
     def update(self):
-        if self.animar_latir == True:
-            self.atual = self.atual + 0.05
-            if self.atual >= len(self.sprites):
-                self.atual = 0
-                self.animar_latir = False
-            self.image = self.sprites[int(self.atual)]
+        if self.animar_latir == True: # Animação de latido
+            self.atual = self.atual + 0.1 # Velocidade do latido
+            if self.atual >= len(self.sprites): # Se a animação terminou
+                self.atual = 0 # Reseta o frame atual
+                self.animar_latir = False 
+            self.image = self.sprites[int(self.atual)]  # Atualiza a imagem
             if self.facing < 0:
-                self.image = pygame.transform.flip(self.image, True, False)
-            self.image = pygame.transform.scale(self.image, (120, 120))
-        elif self.pulando:
-            self.atual = self.atual + 0.1
-            if self.atual >= len(self.pulando_sprites):
-                self.atual = len(self.pulando_sprites) - 1
-            img = self.pulando_sprites[int(self.atual)]
-            if self.facing < 0:
-                img = pygame.transform.flip(img, True, False)
-            self.image = pygame.transform.scale(img, (120, 120))
+                self.image = pygame.transform.flip(self.image, True, False) # Flip horizontal
+            self.image = pygame.transform.scale(self.image, (120, 120)) # Escala a imagem
+            
+        elif self.pulando: # Animação de pulo
+            self.atual = self.atual + 0.1 # Velocidade do pulo
+            if self.atual >= len(self.pulando_sprites): # Se a animação terminou
+                self.atual = len(self.pulando_sprites) - 1 # Fica no último frame
+            img = self.pulando_sprites[int(self.atual)] # Pega a imagem do pulo
+            if self.facing < 0: # Se estiver virado para a esquerda
+                img = pygame.transform.flip(img, True, False) # Flip horizontal
+            self.image = pygame.transform.scale(img, (120, 120)) # Escala a imagem
+            
         elif self.andando:
             self.atual = self.atual + 0.05
             if self.atual >= len(self.andando_sprites):
@@ -99,7 +108,7 @@ class Caramelo(pygame.sprite.Sprite):
             img = self.andando_sprites[int(self.atual)]
             if self.direcao < 0:
                 img = pygame.transform.flip(img, True, False)
-            self.image = pygame.transform.scale(img, (120, 120))
+            self.image = pygame.transform.scale(img, (120, 120)) # Escala a imagem
             self.rect.x += self.direcao * self.velocidade
         else:
             img = self.sprites[0]
@@ -107,10 +116,10 @@ class Caramelo(pygame.sprite.Sprite):
                 img = pygame.transform.flip(img, True, False)
             self.image = pygame.transform.scale(img, (120, 120))
         
-        # Physics
-        self.rect.y += self.velocity_y
-        self.velocity_y += self.gravity
-        if self.rect.bottom >= self.ground_level:
+        # Física do pulo
+        self.rect.y += self.velocity_y  
+        self.velocity_y += self.gravity 
+        if self.rect.bottom >= self.ground_level: # Colisão com o chão
             self.rect.bottom = self.ground_level
             self.velocity_y = 0
             self.on_ground = True
@@ -124,13 +133,13 @@ todas_as_sprites.add(caramelo)
 imagem_fundo = pygame.image.load('sprites/background.jpg').convert()
 imagem_fundo = pygame.transform.scale(imagem_fundo, (largura, altura))
 
-relogio = pygame.time.Clock()        
+relogio = pygame.time.Clock()       
         
 
-while True:
-    relogio.tick()
-    tela.fill((PRETO))
-    for event in pygame.event.get():
+while True: # Loop principal
+    relogio.tick() # Controla a taxa de frames
+    tela.fill(PRETO)
+    for event in pygame.event.get(): # Loop de eventos
         if event.type == QUIT:
             pygame.quit()
             exit()
@@ -147,8 +156,8 @@ while True:
     else:
         caramelo.parar()
 
-    tela.blit(imagem_fundo, (0, 0))
-    todas_as_sprites.draw(tela)
-    todas_as_sprites.update()
-    pygame.display.flip()
+    tela.blit(imagem_fundo, (0, 0)) # Desenha o fundo
+    todas_as_sprites.draw(tela) # Desenha todas as sprites
+    todas_as_sprites.update() # Atualiza todas as sprites
+    pygame.display.flip() # Atualiza o display
     
