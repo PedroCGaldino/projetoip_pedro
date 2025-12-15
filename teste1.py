@@ -58,8 +58,7 @@ class Caramelo(pygame.sprite.Sprite):
             self.andando_sprites.append(spritesheet_andando.subsurface(rect))
 
         self.pulando_sprites = []
-        spritesheet_pulando = pygame.image.load(os.path.join(
-            diretorio_principal, 'sprites', 'caramelo_pulando.png'))
+        spritesheet_pulando = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'caramelo_pulando.png'))
         frame_width_p = spritesheet_pulando.get_width() // 8
         frame_height_p = spritesheet_pulando.get_height()
 
@@ -203,8 +202,33 @@ imagem_fundo_original = pygame.image.load(os.path.join(
     diretorio_principal, 'sprites', 'background.jpg')).convert()
 imagem_fundo = pygame.transform.scale(imagem_fundo_original, (largura, altura))
 
-# --- Menu inicial ---
+def carregar_slides():
+    # IMPORTANTE: Use os nomes reais dos seus arquivos
+    nomes_hist = [os.path.join(diretorio_principal, 'imagens', 'historia1.jpeg'),
+                os.path.join(diretorio_principal, 'imagens', 'historia2.jpeg'),
+                os.path.join(diretorio_principal, 'imagens', 'historia3.jpeg'), 
+                os.path.join(diretorio_principal, 'imagens', 'historia4.jpeg'), 
+                os.path.join(diretorio_principal, 'imagens', 'historia5.jpeg')]
+    slides_carregados = []
+    
+    for nome in nomes_hist:
+        try:
+            imagem = pygame.image.load(nome).convert()
+            imagem_escala = pygame.transform.scale(imagem, (largura, altura))
+            slides_carregados.append(imagem_escala)
+        except pygame.error as e:
+            print(f"Erro ao carregar a imagem {nome}. Usando placeholder: {e}")
+            # Placeholder em caso de erro para não travar o jogo
+            placeholder = pygame.Surface((largura, altura))
+            placeholder.fill((255, 0, 0))
+            slides_carregados.append(placeholder)
 
+    return slides_carregados
+
+SLIDES = carregar_slides()
+NUM_SLIDES = len(SLIDES)
+
+# --- Menu inicial ---
 
 def _draw_button(surface, rect, text, font, hover=False):
     color = (200, 160, 60) if not hover else (255, 200, 70)
@@ -252,6 +276,7 @@ while in_menu:
     
     mx, my = pygame.mouse.get_pos()
     click = False
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -273,13 +298,6 @@ while in_menu:
         spacing = 140
         start_rect.center = (largura // 2 - spacing, y_pos)
         exit_rect.center = (largura // 2 + spacing, y_pos)
-    else:
-        title_surf = font_title.render('CARAMELO', True, (255, 200, 60))
-        trect = title_surf.get_rect(center=(largura // 2, altura // 4))
-        tela.blit(title_surf, trect)
-        y_pos = int(altura * 0.65)
-        start_rect.center = (largura // 2 - btn_w - 20, y_pos)
-        exit_rect.center = (largura // 2 + btn_w + 20, y_pos)
 
     hover_start = start_rect.collidepoint((mx, my))
     hover_exit = exit_rect.collidepoint((mx, my))
@@ -296,6 +314,53 @@ while in_menu:
     pygame.display.flip()
     menu_clock.tick(60)
 
+slide_atual_indice = 0
+tempo_ultima_troca = pygame.time.get_ticks() 
+historia_rodando = True
+
+# Entra no loop da história SÓ SE o menu terminou por 'Start' ou 'Enter'
+# Se o menu terminou por 'Exit', o programa já terá saído.
+if not in_menu:
+    
+    while historia_rodando:
+        
+        # 1. Eventos (Apenas QUIT é permitido)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == KEYDOWN and event.key == K_SPACE:
+                # Pula para o próximo slide imediatamente
+                slide_atual_indice += 1
+                if slide_atual_indice >= NUM_SLIDES:
+                    historia_rodando = False
+                else:
+                    tempo_ultima_troca = pygame.time.get_ticks()
+        
+        # 2. Atualização Lógica (Controle de Tempo)
+        tempo_agora = pygame.time.get_ticks()
+        
+        TEMPO_POR_SLIDE = 4000  # 4 segundos por slide
+        if tempo_agora - tempo_ultima_troca >= TEMPO_POR_SLIDE:
+            
+            slide_atual_indice += 1
+            tempo_ultima_troca = tempo_agora
+            
+            # Fim da história
+            if slide_atual_indice >= NUM_SLIDES:
+                historia_rodando = False
+                
+                
+        # 3. Desenho
+        tela.fill((0, 0, 0)) # Fundo preto
+        # Desenha o slide atual
+        if slide_atual_indice < NUM_SLIDES:
+             tela.blit(SLIDES[slide_atual_indice], (0, 0))
+             
+        pygame.display.flip()
+        menu_clock.tick(60)
+
 relogio = pygame.time.Clock()
 
 while True:  # Loop principal
@@ -310,19 +375,6 @@ while True:  # Loop principal
             caramelo.latir()
         if event.type == KEYDOWN and event.key == K_w:
             caramelo.pular()
-        # Toggle fullscreen with F11 or F
-        if event.type == KEYDOWN and (event.key == K_F11 or event.key == K_f):
-            is_fullscreen = not is_fullscreen
-            if is_fullscreen:
-                info = pygame.display.Info()
-                largura, altura = info.current_w, info.current_h
-                tela = pygame.display.set_mode(
-                    (largura, altura), pygame.FULLSCREEN)
-            else:
-                largura, altura = windowed_size
-                tela = pygame.display.set_mode(windowed_size)
-            imagem_fundo = pygame.transform.scale(
-                imagem_fundo_original, (largura, altura))
 
     keys = pygame.key.get_pressed()
     if keys[K_a]:
