@@ -27,8 +27,34 @@ class Plataforma(pygame.sprite.Sprite):
     def __init__(self, x, y, w, h):
         super().__init__()
         self.image = pygame.Surface((w, h))
-        self.image.fill((120, 120, 120))
+        self.image.fill((222, 184, 135))
         self.rect = self.image.get_rect(topleft=(x, y))
+
+# coletáveis
+class Bolo(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        spritesheet = pygame.image.load(
+            os.path.join(diretorio_principal, 'imagens', 'bolo_spritesheet.png')
+        ).convert_alpha()
+
+        #tamanho de cada bolo
+        largura_bolo = spritesheet.get_width() // 5
+        altura_bolo = spritesheet.get_height()
+
+        # pegar apenas o primeiro bolo
+        self.image = spritesheet.subsurface(
+            pygame.Rect(0,0,largura_bolo, altura_bolo)
+        )
+
+        #redimensionar
+        self.image = pygame.transform.scale(self.image, (70,70))
+
+        #posição do bolo
+
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x,y)
+
 
 
 class Caramelo(pygame.sprite.Sprite):
@@ -180,12 +206,13 @@ class Caramelo(pygame.sprite.Sprite):
                     self.velocity_y = 0
 
 
-# Plataformas e Sprites--------------
+# Plataformas, Sprites e Coletavel--------------
 todas_as_sprites = pygame.sprite.Group()
 caramelo = Caramelo()
 todas_as_sprites.add(caramelo)
 
 plataformas = pygame.sprite.Group()
+coletaveis = pygame.sprite.Group()
 
 # chão
 plataformas.add(Plataforma(0, 905, 1280, 60))
@@ -198,9 +225,20 @@ plataformas.add(Plataforma(420, 460, 150, 30))
 plataformas.add(Plataforma(725, 360, 150, 30))
 plataformas.add(Plataforma(125, 360, 150, 30))
 
+#imagem de fundo principal
+
 imagem_fundo_original = pygame.image.load(os.path.join(
     diretorio_principal, 'sprites', 'background.jpg')).convert()
 imagem_fundo = pygame.transform.scale(imagem_fundo_original, (largura, altura))
+
+#coletavel
+
+bolo = Bolo(1200,250)
+coletaveis.add(bolo)
+
+pontuacao_coletaveis = 0
+fonte_pontos = pygame.font.SysFont(None, 48)
+
 
 def carregar_slides():
     # IMPORTANTE: Use os nomes reais dos seus arquivos
@@ -341,7 +379,7 @@ if not in_menu:
         # 2. Atualização Lógica (Controle de Tempo)
         tempo_agora = pygame.time.get_ticks()
         
-        TEMPO_POR_SLIDE = 4000  # 4 segundos por slide
+        TEMPO_POR_SLIDE = 10000  # 10 segundos por slide
         if tempo_agora - tempo_ultima_troca >= TEMPO_POR_SLIDE:
             
             slide_atual_indice += 1
@@ -387,8 +425,28 @@ while True:  # Loop principal
     # desenhos
     tela.blit(imagem_fundo, (0, 0))  # Desenha o fundo
     plataformas.draw(tela)           # Desenha as plataformas
+    coletaveis.draw(tela)           # Desenha os coletaveis
     todas_as_sprites.draw(tela)      # Desenha todas as sprites
+    #desenhar pontuação dos coletaveis
 
-    # mudanças
+    texto_pontos = fonte_pontos.render(
+        f"Bolos : {pontuacao_coletaveis}", True, (255, 255, 255)
+    )
+    tela.blit(texto_pontos,(20,20))
+
+
+    # MUDANÇAS(UPDATE)
     todas_as_sprites.update(plataformas)  # Atualiza todas as sprites
+
+    #COLETA DE BOLOS (#uso de função para colidir)
+    bolos_coletados = pygame.sprite.spritecollide(
+        caramelo,       # jogador
+        coletaveis,     #grupo de coletaveis
+        True            #True = remove o bolo ao coletar
+    )  
+    if bolos_coletados:
+        pontuacao_coletaveis += len(bolos_coletados)
+
+
+    #MUDANÇA(DISPLAY)
     pygame.display.flip()                 # Atualiza o display
