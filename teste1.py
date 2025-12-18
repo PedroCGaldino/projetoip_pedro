@@ -10,16 +10,12 @@ diretorio_sons = os.path.join(diretorio_principal, 'sons')
 pygame.init()
 
 largura = 1280
-altura = 960
+altura = 760
 
 PRETO = (0, 0, 0)
 
 tela = pygame.display.set_mode((largura, altura))
 pygame.display.set_caption("Caramelo: A Saga do Bolo de Rolo Dourado")
-
-# Fullscreen toggle state
-is_fullscreen = False
-windowed_size = (largura, altura)
 
 # plataforma (formato retangulo)
 
@@ -55,70 +51,127 @@ class Bolo(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (x,y)
 
+class Juliete(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        spritesheet = pygame.image.load(
+            os.path.join(diretorio_principal, 'imagens', 'juliet_spritesheet.png')
+        ).convert_alpha()
 
+        largura_juliete = spritesheet.get_width() // 5
+        altura_juliete = spritesheet.get_height()
+
+        self.image = spritesheet.subsurface(
+            pygame.Rect(0,0,largura_juliete, altura_juliete)
+        )
+
+        self.image = pygame.transform.scale(self.image, (70,70))
+
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x,y)
+
+class Osso(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        spritesheet = pygame.image.load(
+            os.path.join(diretorio_principal, 'imagens', 'osso_spritesheet.png')
+        ).convert_alpha()
+
+        largura_osso = spritesheet.get_width() // 6
+        altura_osso = spritesheet.get_height()
+
+        self.image = spritesheet.subsurface(
+            pygame.Rect(0,0,largura_osso, altura_osso)
+        )
+
+        self.image = pygame.transform.scale(self.image, (70,70))
+
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x,y)
 
 class Caramelo(pygame.sprite.Sprite):
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__()
 
-        self.sprites = []
-        self.sprites.append(pygame.image.load(os.path.join(
-            diretorio_principal, 'sprites', 'sprite_latido0.png')))
-        self.sprites.append(pygame.image.load(os.path.join(
-            diretorio_principal, 'sprites', 'sprite_latido1.png')))
-        self.sprites.append(pygame.image.load(os.path.join(
-            diretorio_principal, 'sprites', 'sprite_latido2.png')))
-        self.sprites.append(pygame.image.load(os.path.join(
-            diretorio_principal, 'sprites', 'sprite_latido3.png')))
-        self.sprites.append(pygame.image.load(os.path.join(
-            diretorio_principal, 'sprites', 'sprite_latido4.png')))
-
-        self.andando_sprites = []
-        spritesheet_andando = pygame.image.load(os.path.join(
-            diretorio_principal, 'sprites', 'caramelo_andando.png'))
-        frame_width = spritesheet_andando.get_width() // 3
-        frame_height = spritesheet_andando.get_height()
-
+        # --- 1. CARREGAMENTO SPRITES NORMAIS ---
+        self.latido_normal = []
+        sheet_lj = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'caramelo_latindo.png')).convert_alpha()
+        fw_lj = sheet_lj.get_width() // 4
+        for i in range(4):
+            self.latido_normal.append(pygame.transform.scale(sheet_lj.subsurface(pygame.Rect(i*fw_lj, 0, fw_lj, sheet_lj.get_height())), (120, 120)))        
+        
+        # Andar Normal
+        self.andando_normal = []
+        sheet_n = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'caramelo_andando.png')).convert_alpha()
+        fw_n = sheet_n.get_width() // 3
         for i in range(3):
-            rect = pygame.Rect(i * frame_width, 0, frame_width, frame_height)
-            self.andando_sprites.append(spritesheet_andando.subsurface(rect))
+            self.andando_normal.append(pygame.transform.scale(sheet_n.subsurface(pygame.Rect(i*fw_n, 0, fw_n, sheet_n.get_height())), (120, 120)))
 
-        self.pulando_sprites = []
-        spritesheet_pulando = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'caramelo_pulando.png'))
-        frame_width_p = spritesheet_pulando.get_width() // 8
-        frame_height_p = spritesheet_pulando.get_height()
-
+        # Pulo Normal
+        self.pulando_normal = []
+        sheet_p = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'caramelo_pulando.png')).convert_alpha()
+        fw_p = sheet_p.get_width() // 8
         for i in range(7):
-            rect = pygame.Rect(i * frame_width_p, 0,
-                               frame_width_p, frame_height_p)
-            self.pulando_sprites.append(spritesheet_pulando.subsurface(rect))
+            self.pulando_normal.append(pygame.transform.scale(sheet_p.subsurface(pygame.Rect(i*fw_p, 0, fw_p, sheet_p.get_height())), (120, 120)))
 
+        # --- 2. CARREGAMENTO SPRITES JULIETE (COM ÓCULOS) ---
+        # Andar Juliete (4 frames)
+        self.andando_juliete = []
+        sheet_j = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'caramelo_juliete.png')).convert_alpha()
+        fw_j = sheet_j.get_width() // 4
+        for i in range(4):
+            self.andando_juliete.append(pygame.transform.scale(sheet_j.subsurface(pygame.Rect(i*fw_j, 0, fw_j, sheet_j.get_height())), (120, 120)))
+
+        # Latido Juliete (arquivos: sprite_latido0_j.png, etc)
+        self.latido_juliete = []
+        sheet_lj = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'latido_juliete.png')).convert_alpha()
+        fw_lj = sheet_lj.get_width() // 4
+        for i in range(4):
+            self.latido_juliete.append(pygame.transform.scale(sheet_lj.subsurface(pygame.Rect(i*fw_lj, 0, fw_lj, sheet_lj.get_height())), (120, 120)))
+
+        # Pulo Juliete (arquivo: pulando_juliete.png)
+        self.pulando_juliete = []
+        sheet_pj = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'pulando_juliete.png')).convert_alpha()
+        fw_pj = sheet_pj.get_width() // 4
+        for i in range(4):
+            self.pulando_juliete.append(pygame.transform.scale(sheet_pj.subsurface(pygame.Rect(i*fw_pj, 0, fw_pj, sheet_pj.get_height())), (120, 120)))
+
+        # --- 3. CONFIGURAÇÃO DE ESTADO ---
+        self.tem_juliete = False
+        self.sprites = self.latido_normal 
+        self.andando_sprites = self.andando_normal
+        self.pulando_sprites = self.pulando_normal
+        
         self.atual = 0
-        self.image = self.sprites[self.atual]
-        self.image = pygame.transform.scale(self.image, (120, 120))
-
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (100, 785)
-
-        self.animar_latir = False  # Controla a animação de latido
-        self.andando = False       # Controla a animação de andar
-        self.pulando = False       # Controla a animação de pulo
-        self.direcao = 0           # Direção do movimento
+        self.image = self.sprites[0]
+        self.rect = self.image.get_rect(topleft=(100, 785))
+        
+        self.animar_latir = False
+        self.andando = False
+        self.pulando = False
+        self.direcao = 0
         self.velocidade = 5
-        self.facing = 1            # 1 para direita, -1 para esquerda
+        self.facing = 1
         self.velocity_y = 0
         self.gravity = 0.6
         self.jump_strength = 14
         self.on_ground = False
-        # antigo chão: self.ground_level = 785 + 120
+
+    def usar_juliete(self):
+        """Troca todas as listas de animação para a versão com óculos"""
+        self.tem_juliete = True
+        self.sprites = self.latido_juliete
+        self.andando_sprites = self.andando_juliete
+        self.pulando_sprites = self.pulando_juliete
 
     def latir(self):
         self.animar_latir = True
+        self.atual = 0 # Reinicia animação ao latir
 
-    def andar(self, direcao):
+    def andar(self, dir):
         self.andando = True
-        self.direcao = direcao
-        self.facing = direcao
+        self.direcao = dir
+        self.facing = dir
 
     def pular(self):
         if self.on_ground:
@@ -133,77 +186,48 @@ class Caramelo(pygame.sprite.Sprite):
     def update(self, plataformas):
         old_bottom = self.rect.bottom
 
-        if self.animar_latir == True:  # Animação de latido
-            self.atual = self.atual + 0.1  # Velocidade do latido
-            if self.atual >= len(self.sprites):  # Se a animação terminou
-                self.atual = 0  # Reseta o frame atual
+        # Seleção de Frame
+        if self.animar_latir:
+            self.atual += 0.15
+            if self.atual >= len(self.sprites):
+                self.atual = 0
                 self.animar_latir = False
-            self.image = self.sprites[int(self.atual)]  # Atualiza a imagem
-            if self.facing < 0:
-                self.image = pygame.transform.flip(
-                    self.image, True, False)  # Flip horizontal
-            self.image = pygame.transform.scale(
-                self.image, (120, 120))  # Escala a imagem
-
-        elif self.pulando:  # Animação de pulo
-            self.atual = self.atual + 0.1  # Velocidade do pulo
-            if self.atual >= len(self.pulando_sprites):  # Se a animação terminou
-                self.atual = len(self.pulando_sprites) - \
-                    1  # Fica no último frame
-            # Pega a imagem do pulo
+            img = self.sprites[int(self.atual)]
+        elif self.pulando:
+            self.atual += 0.1
+            if self.atual >= len(self.pulando_sprites):
+                self.atual = len(self.pulando_sprites) - 1
             img = self.pulando_sprites[int(self.atual)]
-            if self.facing < 0:  # Se estiver virado para a esquerda
-                img = pygame.transform.flip(
-                    img, True, False)  # Flip horizontal
-            self.image = pygame.transform.scale(
-                img, (120, 120))  # Escala a imagem
-
         elif self.andando:
-            self.atual = self.atual + 0.05
+            self.atual += 0.1
             if self.atual >= len(self.andando_sprites):
                 self.atual = 0
             img = self.andando_sprites[int(self.atual)]
-            if self.direcao < 0:
-                img = pygame.transform.flip(img, True, False)
-            self.image = pygame.transform.scale(
-                img, (120, 120))  # Escala a imagem
-            # andando inicialmente (sem puder pular e andar) self.rect.x += self.direcao * self.velocidade
-
         else:
-            img = self.sprites[0]
-            if self.facing < 0:
-                img = pygame.transform.flip(img, True, False)
-            self.image = pygame.transform.scale(img, (120, 120))
+            img = self.sprites[0] # Frame parado
 
-        # Se mover independente do que acontece
+        # Espelhamento
+        if self.facing < 0:
+            img = pygame.transform.flip(img, True, False)
+        
+        self.image = img
+
+        # Movimentação e Física
         if self.andando:
             self.rect.x += self.direcao * self.velocidade
 
-        # Física do pulo
         self.velocity_y += self.gravity
         self.rect.y += self.velocity_y
-        self.on_ground = False  # assume que está no ar até encostar em algo
 
-        # colisoes com plataformas(o chão virou plataforma)
-        # (antigo codigo do chão)
-        # if self.rect.bottom >= self.ground_level:
-        #     self.rect.bottom = self.ground_level
-        #     self.velocity_y = 0
-        #     self.on_ground = True
-        #     self.pulando = False
-
-        if self.velocity_y > 0:  # só checa cão quando está descendo
+        # Colisão com Chão/Plataformas
+        if self.velocity_y > 0:
             colisoes = pygame.sprite.spritecollide(self, plataformas, False)
             for plat in colisoes:
-                # caindo encontou em cima
-                if self.velocity_y > 0 and old_bottom <= plat.rect.top:
+                if old_bottom <= plat.rect.top:
                     self.rect.bottom = plat.rect.top
                     self.velocity_y = 0
                     self.on_ground = True
                     self.pulando = False
-                elif self.velocity_y < 0 and self.rect.top <= plat.rect.bottom:
-                    self.rect.top = plat.rect.bottom
-                    self.velocity_y = 0
 
 
 # Plataformas, Sprites e Coletavel--------------
@@ -212,7 +236,10 @@ caramelo = Caramelo()
 todas_as_sprites.add(caramelo)
 
 plataformas = pygame.sprite.Group()
-coletaveis = pygame.sprite.Group()
+coletavel_bolo = pygame.sprite.Group()  
+coletavel_juliete = pygame.sprite.Group()
+coletavel_osso = pygame.sprite.Group()
+
 
 # chão
 plataformas.add(Plataforma(0, 905, 1280, 60))
@@ -234,9 +261,29 @@ imagem_fundo = pygame.transform.scale(imagem_fundo_original, (largura, altura))
 #coletavel
 
 bolo = Bolo(1200,250)
-coletaveis.add(bolo)
+coletavel_bolo.add(bolo)
 
-pontuacao_coletaveis = 0
+juliet = Juliete(50,300)
+coletavel_juliete.add(juliet)
+
+osso1 = Osso(800, 250)
+osso2 = Osso(500, 550)
+osso3 = Osso(200, 650)
+osso4 = Osso(700, 450)
+osso5 = Osso(400, 350)
+osso6 = Osso(300, 150)
+osso7 = Osso(1000, 550)
+osso8 = Osso(600, 150)
+osso9 = Osso(900, 350)
+osso10 = Osso(100, 250)
+
+coletavel_osso.add(osso1, osso2, osso3, osso4, osso5, osso6, osso7, osso8, osso9, osso10)
+
+pontuacao_osso = 0
+pontuacao_juliete = 0
+pontuacao_bolos = 0
+
+
 fonte_pontos = pygame.font.SysFont(None, 48)
 
 
@@ -411,6 +458,8 @@ while True:  # Loop principal
             exit()
         if event.type == KEYDOWN and event.key == K_SPACE:
             caramelo.latir()
+            pygame.mixer.music.load(os.path.join(diretorio_principal, 'audio', 'latidocaramelo.mp3'))
+            pygame.mixer.music.play(1)
         if event.type == KEYDOWN and event.key == K_w:
             caramelo.pular()
 
@@ -425,15 +474,27 @@ while True:  # Loop principal
     # desenhos
     tela.blit(imagem_fundo, (0, 0))  # Desenha o fundo
     plataformas.draw(tela)           # Desenha as plataformas
-    coletaveis.draw(tela)           # Desenha os coletaveis
+    coletavel_bolo.draw(tela)           # Desenha os coletaveis
+    coletavel_osso.draw(tela)
+    coletavel_juliete.draw(tela)
     todas_as_sprites.draw(tela)      # Desenha todas as sprites
+    
     #desenhar pontuação dos coletaveis
 
-    texto_pontos = fonte_pontos.render(
-        f"Bolos : {pontuacao_coletaveis}", True, (255, 255, 255)
+    texto_pontos_bolos = fonte_pontos.render(
+        f"Bolos : {pontuacao_bolos}", True, (255, 255, 255)
     )
-    tela.blit(texto_pontos,(20,20))
+    tela.blit(texto_pontos_bolos,(20,20))
 
+    texto_pontos_ossos = fonte_pontos.render(
+        f"Ossos : {pontuacao_osso}", True, (255, 255, 255)
+    )
+    tela.blit(texto_pontos_ossos,(20,60))
+
+    texto_pontos_juliete = fonte_pontos.render(
+        f"Juliete : {pontuacao_juliete}", True, (255, 255, 255)
+    )
+    tela.blit(texto_pontos_juliete,(20,100))
 
     # MUDANÇAS(UPDATE)
     todas_as_sprites.update(plataformas)  # Atualiza todas as sprites
@@ -441,12 +502,75 @@ while True:  # Loop principal
     #COLETA DE BOLOS (#uso de função para colidir)
     bolos_coletados = pygame.sprite.spritecollide(
         caramelo,       # jogador
-        coletaveis,     #grupo de coletaveis
+        coletavel_bolo,     #grupo de coletaveis
         True            #True = remove o bolo ao coletar
     )  
+
+    ossos_coletados = pygame.sprite.spritecollide(
+        caramelo,
+        coletavel_osso,
+        True
+    )
+
+    juliete_coletados = pygame.sprite.spritecollide(
+        caramelo,   
+        coletavel_juliete,
+        True
+    )
+
+    # 1. Itens comuns: Apenas somam na pontuação geral
+    if ossos_coletados:
+        pontuacao_osso += len(ossos_coletados)
+        pygame.mixer.music.load(os.path.join(diretorio_principal, 'audio', 'pegando_osso.mp3'))
+        pygame.mixer.music.play(1)
+
+    if juliete_coletados:
+        pontuacao_juliete += len(juliete_coletados)
+        caramelo.usar_juliete() # Chama a função que troca todos os sprites
+        pygame.mixer.music.load(os.path.join(diretorio_principal, 'audio', 'musica_fundo.mp3'))
+        pygame.mixer.music.play(-1)
+
+    # 2. O BOLO: Soma na pontuação E ativa a tela de vitória
     if bolos_coletados:
-        pontuacao_coletaveis += len(bolos_coletados)
+        pontuacao_bolos += len(bolos_coletados)
+        
+        if pontuacao_bolos >= 1:
+            # Aciona a vitória imediatamente ao coletar o bolo
+            vitoria = os.path.join(diretorio_principal, 'imagens', 'vitoria.jpeg')
+            imagem_vitoria = pygame.image.load(vitoria).convert()
+            imagem_vitoria = pygame.transform.scale(imagem_vitoria, (largura, altura))
+            pygame.mixer.music.load(os.path.join(diretorio_principal, 'audio', 'somvitoria.mp3'))
+            pygame.mixer.music.play(1)
 
+            vitoria_ativa = True
+            while vitoria_ativa:
+                mx, my = pygame.mouse.get_pos()
+                click = False
 
-    #MUDANÇA(DISPLAY)
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        exit()
+                    
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        click = True
+                    
+                    if event.type == pygame.KEYDOWN:
+                        if event.key in (pygame.K_ESCAPE, pygame.K_RETURN):
+                            pygame.quit()
+                            exit()
+
+                # Desenha o fundo e o botão
+                tela.blit(imagem_vitoria, (0, 0))
+                
+                hover_exit = exit_rect.collidepoint((mx, my))
+                _draw_button(tela, exit_rect, 'Sair', font_btn, hover_exit)
+                
+
+                if hover_exit and click:
+                    pygame.quit()
+                    exit()
+
+                pygame.display.update()
+        #MUDANÇA(DISPLAY)
     pygame.display.flip()                 # Atualiza o display
