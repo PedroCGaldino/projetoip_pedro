@@ -10,11 +10,11 @@ diretorio_sons = os.path.join(diretorio_principal, 'sons')
 pygame.init()
 
 largura = 1280
-altura = 760
+altura = 720
 
 PRETO = (0, 0, 0)
 
-tela = pygame.display.set_mode((largura, altura))
+tela = pygame.display.set_mode((largura, altura), pygame.FULLSCREEN)
 pygame.display.set_caption("Caramelo: A Saga do Bolo de Rolo Dourado")
 
 # plataforma (formato retangulo)
@@ -233,6 +233,8 @@ class Caramelo(pygame.sprite.Sprite):
 # Plataformas, Sprites e Coletavel--------------
 todas_as_sprites = pygame.sprite.Group()
 caramelo = Caramelo()
+caramelo.rect.x = 100
+caramelo.rect.y = altura - 120
 todas_as_sprites.add(caramelo)
 
 plataformas = pygame.sprite.Group()
@@ -241,16 +243,20 @@ coletavel_juliete = pygame.sprite.Group()
 coletavel_osso = pygame.sprite.Group()
 
 
-# chão
-plataformas.add(Plataforma(0, 905, 1280, 60))
+plataformas.add(Plataforma(0, altura, largura, 60))
 
-# plataformas
-plataformas.add(Plataforma(650, 760, 150, 30))
-plataformas.add(Plataforma(350, 660, 150, 30))
-plataformas.add(Plataforma(650, 560, 150, 30))
-plataformas.add(Plataforma(420, 460, 150, 30))
-plataformas.add(Plataforma(725, 360, 150, 30))
-plataformas.add(Plataforma(125, 360, 150, 30))
+# --- PLATAFORMAS ---
+# Em vez de posições fixas, vamos usar a 'altura' como base e subtrair valores.
+# Assim, elas sempre subirão a partir do chão, não importa o tamanho da tela.
+
+distancia_entre_plataformas = 100 # Espaço vertical entre elas
+
+plataformas.add(Plataforma(650, altura - 130, 150, 30))  # Primeira (acima do chão)
+plataformas.add(Plataforma(350, altura - 230, 150, 30))  # Segunda
+plataformas.add(Plataforma(650, altura - 330, 150, 30))  # Terceira
+plataformas.add(Plataforma(420, altura - 430, 150, 30))  # Quarta
+plataformas.add(Plataforma(725, altura - 530, 150, 30))  # Quinta
+plataformas.add(Plataforma(125, altura - 530, 150, 30))  # Sexta (mesmo nível da anterior)
 
 #imagem de fundo principal
 
@@ -260,24 +266,27 @@ imagem_fundo = pygame.transform.scale(imagem_fundo_original, (largura, altura))
 
 #coletavel
 
-bolo = Bolo(1200,250)
+# Supondo largura = 1280 e altura = 720
+
+# Bolo (perto de uma plataforma alta)
+bolo = Bolo(1200, altura - 670) 
 coletavel_bolo.add(bolo)
 
-juliet = Juliete(50,300)
+# Juliete (perto do início)
+juliet = Juliete(150, altura - 600)
 coletavel_juliete.add(juliet)
 
-osso1 = Osso(800, 250)
-osso2 = Osso(500, 550)
-osso3 = Osso(200, 650)
-osso4 = Osso(700, 450)
-osso5 = Osso(400, 350)
-osso6 = Osso(300, 150)
-osso7 = Osso(1000, 550)
-osso8 = Osso(600, 150)
-osso9 = Osso(900, 350)
-osso10 = Osso(100, 250)
+# Ossos espalhados
+# Usamos (altura - valor) para que, se você aumentar a tela, 
+# eles subam junto com as plataformas.
+osso1 = Osso(800, altura - 600)
+osso2 = Osso(470, altura - 500)
+osso3 = Osso(700, altura - 400)
+osso4 = Osso(400, altura - 300)
+osso5 = Osso(200, altura - 200)
+osso6 = Osso(700, altura - 200)
 
-coletavel_osso.add(osso1, osso2, osso3, osso4, osso5, osso6, osso7, osso8, osso9, osso10)
+coletavel_osso.add(osso1, osso2, osso3, osso4, osso5, osso6)
 
 pontuacao_osso = 0
 pontuacao_juliete = 0
