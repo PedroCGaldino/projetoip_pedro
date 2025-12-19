@@ -86,7 +86,7 @@ O maior desafio identificado pela equipe esteve relacionado ao controle de versi
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/jaikarla/jogo-ip.git
+git clone https://github.com/PedroCGaldino/projetoip_pedro
 ```
 
 2. Instale as dependências:
@@ -96,7 +96,7 @@ pip install pygame
 
 3. Execute o jogo:
 ```bash
-python jogo.py
+python main.py
 ```
 
 ---
