@@ -303,7 +303,9 @@ def carregar_slides():
                 os.path.join(diretorio_principal, 'imagens', 'historia2.jpeg'),
                 os.path.join(diretorio_principal, 'imagens', 'historia3.jpeg'), 
                 os.path.join(diretorio_principal, 'imagens', 'historia4.jpeg'), 
-                os.path.join(diretorio_principal, 'imagens', 'historia5.jpeg')]
+                os.path.join(diretorio_principal, 'imagens', 'historia5.jpeg'),
+                os.path.join(diretorio_principal, 'imagens', 'controles.png'),
+                os.path.join(diretorio_principal, 'imagens', 'condicao_vitoria.png')]
     slides_carregados = []
     
     for nome in nomes_hist:
@@ -575,6 +577,10 @@ while True:  # Loop principal
                 
                 hover_exit = exit_rect.collidepoint((mx, my))
                 _draw_button(tela, exit_rect, 'Sair', font_btn, hover_exit)
+                texto_pontos_ossos = fonte_pontos.render(
+                    f"Pontos : {pontuacao_osso * 10}", True, (255, 255, 255)
+                )
+                tela.blit(texto_pontos_ossos,(550,650))
                 
 
                 if hover_exit and click:
