@@ -236,6 +236,38 @@ class Caramelo(pygame.sprite.Sprite):
         if self.rect.right > largura:
             self.rect.right = largura
 
+class Inimigo(pygame.sprite.Sprite):
+    def __init__(self, x, y, limite_escala):
+        super().__init__()
+      
+        # Carrega a imagem
+        self.original_image = pygame.image.load(os.path.join(diretorio_principal,'sprites', 'gato.png')).convert_alpha()
+        self.original_image = pygame.transform.scale(self.original_image, (100, 100))
+        
+        # Se o gato começa andando para a DIREITA (velocidade positiva), 
+        # mas a imagem aponta para a ESQUERDA, nós a invertemos aqui:
+        self.image = pygame.transform.flip(self.original_image, True, False)
+        
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.velocidade = 3
+        self.inicio_x = x
+        self.limite_escala = limite_escala
+        self.olhando_direita = True # Agora ele começa olhando para a direita
+
+    def update(self, *args):
+        self.rect.x += self.velocidade
+        
+        # Patrulha: vai e volta
+        if self.rect.x >= self.inicio_x + self.limite_escala:
+            self.rect.x = self.inicio_x + self.limite_escala # Ajuste para não prender na borda
+            self.velocidade *= -1
+            self.image = pygame.transform.flip(self.image, True, False)
+            
+        elif self.rect.x <= self.inicio_x:
+            self.rect.x = self.inicio_x # Ajuste para não prender na borda
+            self.velocidade *= -1
+            self.image = pygame.transform.flip(self.image, True, False)
+
 
 # Plataformas, Sprites e Coletavel--------------
 todas_as_sprites = pygame.sprite.Group()
@@ -244,10 +276,20 @@ caramelo.rect.x = 100
 caramelo.rect.y = altura - 120
 todas_as_sprites.add(caramelo)
 
+
 plataformas = pygame.sprite.Group()
 coletavel_bolo = pygame.sprite.Group()  
 coletavel_juliete = pygame.sprite.Group()
 coletavel_osso = pygame.sprite.Group()
+
+
+inimigos = pygame.sprite.Group()
+
+# Exemplo: Criando um inimigo em cima da segunda plataforma (x=350, y=altura-230)
+# Ajustamos o Y para ele ficar em cima da plataforma (altura da plat é 30, inimigo é 50)
+inimigo_plataforma = Inimigo(350, altura - 110, 800)
+inimigos.add(inimigo_plataforma)
+todas_as_sprites.add(inimigo_plataforma)
 
 
 plataformas.add(Plataforma(0, altura, largura, 60))
@@ -500,6 +542,7 @@ while True:  # Loop principal
     coletavel_bolo.draw(tela)           # Desenha os coletaveis
     coletavel_osso.draw(tela)
     coletavel_juliete.draw(tela)
+    inimigos.draw(tela)
     todas_as_sprites.draw(tela)      # Desenha todas as sprites
     
     #desenhar pontuação dos coletaveis
@@ -541,7 +584,59 @@ while True:  # Loop principal
         True
     )
 
-    # 1. Itens comuns: Apenas somam na pontuação geral
+
+    # Verifica colisão do Caramelo com o grupo de inimigos
+    colisao_inimigo = pygame.sprite.spritecollide(caramelo, inimigos, False)
+
+   # 1. Verifica colisão do Caramelo com o grupo de inimigos
+    colisao_inimigo = pygame.sprite.spritecollide(caramelo, inimigos, False)
+
+    if colisao_inimigo:
+        # IMPORTANTE: Subtraímos da variável numérica de pontos, não da lista de sprites
+        pontuacao_osso -= 1 
+        
+        # Se a pontuação chegar a zero ou menos, o jogador perde
+        if pontuacao_osso <= 0:
+            # Garante que a pontuação não apareça negativa na tela
+            pontuacao_osso = 0 
+            
+            # Carrega e exibe tela de derrota
+            derrota_path = os.path.join(diretorio_principal, 'imagens', 'derrota.jpeg')
+            if os.path.exists(derrota_path):
+                imagem_derrota = pygame.image.load(derrota_path).convert()
+                imagem_derrota = pygame.transform.scale(imagem_derrota, (largura, altura))
+                
+                # Para a música atual e toca o som de derrota
+                pygame.mixer.music.stop()
+                pygame.mixer.music.load(os.path.join(diretorio_principal, 'audio', 'somderrota.mp3'))
+                pygame.mixer.music.play(1)
+
+                derrota_ativa = True
+                while derrota_ativa:
+                    mx, my = pygame.mouse.get_pos()
+                    click = False
+                    for event in pygame.event.get():
+                        if event.type == QUIT:
+                            pygame.quit(); exit()
+                        if event.type == MOUSEBUTTONDOWN and event.button == 1:
+                            click = True
+                    
+                    tela.blit(imagem_derrota, (0, 0))
+                    
+                    # Desenha o botão de sair
+                    hover_exit = exit_rect.collidepoint((mx, my))
+                    _draw_button(tela, exit_rect, 'Sair', font_btn, hover_exit)
+                    
+                    if hover_exit and click:
+                        pygame.quit(); exit()
+                    
+                    pygame.display.update()
+        else:
+            # Caso o jogador ainda tenha ossos, damos um "pulo" no caramelo para trás
+            # para ele não ficar colidindo infinitamente e perdendo todos os ossos de vez
+            caramelo.rect.x -= 50
+
+            
     if ossos_coletados:
         pontuacao_osso += len(ossos_coletados)
         som_osso = pygame.mixer.Sound(os.path.join(diretorio_principal, 'audio', 'pegando_osso.mp3'))
