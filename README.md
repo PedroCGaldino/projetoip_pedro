@@ -34,14 +34,14 @@ O projeto foi desenvolvido como um dos requisitos para a conclusão da disciplin
 ---
 
 ## Arquitetura do Projeto
-´´´
+```
 projetoip_pedro/
 ├── audio/
 ├── imagens/
 ├── sprites/
-├── README.md
-└── teste1.py
-´´´
+├── main.py
+└── README.md
+```
 
 ---
 
