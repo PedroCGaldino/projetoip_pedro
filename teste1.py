@@ -117,21 +117,21 @@ class Caramelo(pygame.sprite.Sprite):
         # --- 2. CARREGAMENTO SPRITES JULIETE (COM ÓCULOS) ---
         # Andar Juliete (4 frames)
         self.andando_juliete = []
-        sheet_j = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'caramelo_juliete.png')).convert_alpha()
+        sheet_j = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'cachorro_andando_juliete.png')).convert_alpha()
         fw_j = sheet_j.get_width() // 4
         for i in range(4):
             self.andando_juliete.append(pygame.transform.scale(sheet_j.subsurface(pygame.Rect(i*fw_j, 0, fw_j, sheet_j.get_height())), (120, 120)))
 
         # Latido Juliete (arquivos: sprite_latido0_j.png, etc)
         self.latido_juliete = []
-        sheet_lj = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'latido_juliete.png')).convert_alpha()
+        sheet_lj = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'cachorro_latindo_juliete.png')).convert_alpha()
         fw_lj = sheet_lj.get_width() // 4
         for i in range(4):
             self.latido_juliete.append(pygame.transform.scale(sheet_lj.subsurface(pygame.Rect(i*fw_lj, 0, fw_lj, sheet_lj.get_height())), (120, 120)))
 
         # Pulo Juliete (arquivo: pulando_juliete.png)
         self.pulando_juliete = []
-        sheet_pj = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'pulando_juliete.png')).convert_alpha()
+        sheet_pj = pygame.image.load(os.path.join(diretorio_principal, 'sprites', 'cachorro_pulando_juliete.png')).convert_alpha()
         fw_pj = sheet_pj.get_width() // 4
         for i in range(4):
             self.pulando_juliete.append(pygame.transform.scale(sheet_pj.subsurface(pygame.Rect(i*fw_pj, 0, fw_pj, sheet_pj.get_height())), (120, 120)))
