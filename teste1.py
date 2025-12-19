@@ -274,7 +274,8 @@ coletavel_bolo.add(bolo)
 
 # Juliete (perto do início)
 juliet = Juliete(150, altura - 600)
-coletavel_juliete.add(juliet)
+juliet2 = Juliete(1200, altura - 150)
+coletavel_juliete.add(juliet, juliet2)
 
 # Ossos espalhados
 # Usamos (altura - valor) para que, se você aumentar a tela, 
@@ -543,7 +544,7 @@ while True:  # Loop principal
     if bolos_coletados:
         pontuacao_bolos += len(bolos_coletados)
         
-        if pontuacao_bolos >= 1:
+        if pontuacao_bolos >= 1 and pontuacao_juliete >= 2:
             # Aciona a vitória imediatamente ao coletar o bolo
             vitoria = os.path.join(diretorio_principal, 'imagens', 'vitoria.jpeg')
             imagem_vitoria = pygame.image.load(vitoria).convert()
@@ -581,5 +582,44 @@ while True:  # Loop principal
                     exit()
 
                 pygame.display.update()
+
+        else: 
+            derrota = os.path.join(diretorio_principal, 'imagens', 'derrota.jpeg')
+            imagem_derrota = pygame.image.load(derrota).convert()
+            imagem_derrota = pygame.transform.scale(imagem_derrota, (largura, altura))
+            pygame.mixer.music.load(os.path.join(diretorio_principal, 'audio', 'somderrota.mp3'))
+            pygame.mixer.music.play(1)
+
+            derrota_ativa = True
+            while derrota_ativa:
+                mx, my = pygame.mouse.get_pos()
+                click = False
+
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        exit()
+                    
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        click = True
+                    
+                    if event.type == pygame.KEYDOWN:
+                        if event.key in (pygame.K_ESCAPE, pygame.K_RETURN):
+                            pygame.quit()
+                            exit()
+
+                # Desenha o fundo e o botão
+                tela.blit(imagem_derrota, (0, 0))
+                
+                hover_exit = exit_rect.collidepoint((mx, my))
+                _draw_button(tela, exit_rect, 'Sair', font_btn, hover_exit)
+                
+
+                if hover_exit and click:
+                    pygame.quit()
+                    exit()
+
+                pygame.display.update()
+
         #MUDANÇA(DISPLAY)
     pygame.display.flip()                 # Atualiza o display
