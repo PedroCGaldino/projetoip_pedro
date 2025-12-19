@@ -344,7 +344,7 @@ def _draw_button(surface, rect, text, font, hover=False):
 
 menu_img = None
 mrect = None
-# try possible locations for menu image
+
 possible_menu_paths = [
     os.path.join(diretorio_principal, 'assets', 'menu.jpeg'),
     os.path.join(diretorio_principal, 'sprites', 'menu.jpeg'),
@@ -425,6 +425,10 @@ historia_rodando = True
 # Entra no loop da história SÓ SE o menu terminou por 'Start' ou 'Enter'
 # Se o menu terminou por 'Exit', o programa já terá saído.
 if not in_menu:
+    # Inicia a música de fundo do Caramelo
+    pygame.mixer.music.load(os.path.join(diretorio_principal, 'audio', 'musica_fundo_caramelo.mp3'))
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0.5)
     
     while historia_rodando:
         
@@ -442,7 +446,7 @@ if not in_menu:
                 else:
                     tempo_ultima_troca = pygame.time.get_ticks()
         
-        # 2. Atualização Lógica (Controle de Tempo)
+        # Controle de Tempo
         tempo_agora = pygame.time.get_ticks()
         
         TEMPO_POR_SLIDE = 10000  # 10 segundos por slide
@@ -477,8 +481,8 @@ while True:  # Loop principal
             exit()
         if event.type == KEYDOWN and event.key == K_SPACE:
             caramelo.latir()
-            pygame.mixer.music.load(os.path.join(diretorio_principal, 'audio', 'latidocaramelo.mp3'))
-            pygame.mixer.music.play(1)
+            som_latido = pygame.mixer.Sound(os.path.join(diretorio_principal, 'audio', 'latidocaramelo.mp3'))
+            som_latido.play()
         if event.type == KEYDOWN and event.key == K_w:
             caramelo.pular()
 
@@ -515,7 +519,7 @@ while True:  # Loop principal
     )
     tela.blit(texto_pontos_juliete,(20,100))
 
-    # MUDANÇAS(UPDATE)
+
     todas_as_sprites.update(plataformas)  # Atualiza todas as sprites
 
     #COLETA DE BOLOS (#uso de função para colidir)
@@ -540,12 +544,13 @@ while True:  # Loop principal
     # 1. Itens comuns: Apenas somam na pontuação geral
     if ossos_coletados:
         pontuacao_osso += len(ossos_coletados)
-        pygame.mixer.music.load(os.path.join(diretorio_principal, 'audio', 'pegando_osso.mp3'))
-        pygame.mixer.music.play(1)
+        som_osso = pygame.mixer.Sound(os.path.join(diretorio_principal, 'audio', 'pegando_osso.mp3'))
+        som_osso.play()
 
     if juliete_coletados:
         pontuacao_juliete += len(juliete_coletados)
         caramelo.usar_juliete() # Chama a função que troca todos os sprites
+        pygame.mixer.music.stop()  # Para a música de fundo do Caramelo
         pygame.mixer.music.load(os.path.join(diretorio_principal, 'audio', 'musica_fundo.mp3'))
         pygame.mixer.music.play(-1)
 
@@ -634,5 +639,5 @@ while True:  # Loop principal
 
                 pygame.display.update()
 
-        #MUDANÇA(DISPLAY)
+        
     pygame.display.flip()                 # Atualiza o display
