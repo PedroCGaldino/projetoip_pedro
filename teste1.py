@@ -229,6 +229,13 @@ class Caramelo(pygame.sprite.Sprite):
                     self.on_ground = True
                     self.pulando = False
 
+        if self.rect.left < 0:
+            self.rect.left = 0
+
+        # Borda Direita
+        if self.rect.right > largura:
+            self.rect.right = largura
+
 
 # Plataformas, Sprites e Coletavel--------------
 todas_as_sprites = pygame.sprite.Group()
