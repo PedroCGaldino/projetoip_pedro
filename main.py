@@ -158,7 +158,7 @@ class Caramelo(pygame.sprite.Sprite):
         self.on_ground = False
 
     def usar_juliete(self):
-        """Troca todas as listas de animação para a versão com óculos"""
+        #Troca todas as listas de animação para a versão com óculos
         self.tem_juliete = True
         self.sprites = self.latido_juliete
         self.andando_sprites = self.andando_juliete
@@ -428,7 +428,7 @@ if not in_menu:
     # Inicia a música de fundo do Caramelo
     pygame.mixer.music.load(os.path.join(diretorio_principal, 'audio', 'musica_fundo_caramelo.mp3'))
     pygame.mixer.music.play(-1)
-    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.set_volume(0.2)
     
     while historia_rodando:
         
@@ -553,6 +553,7 @@ while True:  # Loop principal
         pygame.mixer.music.stop()  # Para a música de fundo do Caramelo
         pygame.mixer.music.load(os.path.join(diretorio_principal, 'audio', 'musica_fundo.mp3'))
         pygame.mixer.music.play(-1)
+        pygame.mixer.music.set_volume(0.2)
 
     # 2. O BOLO: Soma na pontuação E ativa a tela de vitória
     if bolos_coletados:
